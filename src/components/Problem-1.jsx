@@ -8,7 +8,16 @@ const Problem1 = () => {
     const [filteredData, setFilteredData] = useState([]);
 
     useEffect(() => {
-        setFilteredData(dataList);
+        const sortedDataList = dataList.sort((a, b) => {
+            if (a.status === 'active' && b.status !== 'active') {
+                return -1;
+            } else if (a.status === 'completed' && b.status !== 'active' && b.status !== 'completed') {
+                return -1;
+            } else {
+                return 1;
+            }
+        });
+        setFilteredData(sortedDataList);
     }, [dataList]);
 
     const handleClick = (val) =>{
