@@ -15,10 +15,19 @@ const style = {
 const Problem2 = () => {
     const [allContacts, setAllContacts] = useState([]);
     const [usContacts, setUsContacts] = useState([]);
+    const [evenContacts, setEvenContacts] = useState([]);
     const [open, setOpen] = useState(false);
     const handleOpen = () => setOpen(true);
-    const handleClose = () => setOpen(false);
     const [show, setShow] = useState('');
+    const [isCheckClicked, setIsCheckClicked] = useState(true);
+    const [modalC, setModalC] = useState(false);
+    const [details, setDetails] = useState([]);
+
+    const handleClose = () => {
+        setModalC(false);
+        setDetails([]);
+        setOpen(false);
+    }
 
     useEffect(() => {
         fetch('https://contact.mediusware.com/api/contacts/')
@@ -41,7 +50,37 @@ const Problem2 = () => {
 
     const handleShow = (value) => {
         setShow(value);
+        setIsCheckClicked(true);
         handleOpen();
+    }
+
+    const handleModalC = (id, value) => {
+        if(value === 'all'){
+            const detailsData = allContacts.find(data => data?.id === id);
+            setDetails(detailsData);
+        }
+
+        if(value === 'us'){
+            const detailsData = allContacts.find(data => data?.id === id);
+            setDetails(detailsData);
+        }
+        
+        setModalC(true);
+    }
+
+    const handleCheckboxChange = (value) => {
+        if(value === 'all'){
+            const evenData = allContacts?.filter(data => data?.id % 2 === 0);
+
+            setEvenContacts(evenData);
+            isCheckClicked ? setIsCheckClicked(false) : setIsCheckClicked(true);
+        }
+        if(value === 'us'){
+            const evenData = usContacts?.filter(data => data?.id % 2 === 0);
+
+            setEvenContacts(evenData);
+            isCheckClicked ? setIsCheckClicked(false) : setIsCheckClicked(true);
+        }
     }
 
     return (
@@ -68,31 +107,74 @@ const Problem2 = () => {
                         <Box sx={style}>
                             <h2 className='text-center pb-5' id="parent-modal-title">All Contacts</h2>
 
-                            <div style={{ maxHeight: '400px', overflowY: 'auto' }}>
-                                <table className="table table-striped ">
-                                    <thead>
-                                        <tr>
-                                            <th scope="col">Contact Number</th>
-                                            <th scope="col">Country</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {
-                                            allContacts?.map((data, index) => (
-                                                <tr key={index}>
-                                                    <td scope="col">{data?.phone}</td>
-                                                    <td scope="col">{data?.country?.name}</td>
-                                                </tr>
-                                            ))
-                                        }
-                                    </tbody>
-                                </table>
+                            {
+                                modalC ? 
+                                <div style={{ maxHeight: '400px', overflowY: 'auto' }}>
+                                    <table className="table table-striped ">
+                                        <thead>
+                                            <tr>
+                                                <th scope="col">Id</th>
+                                                <th scope="col">Contact Number</th>
+                                                <th scope="col">Country</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td scope="col">{details?.id}</td>
+                                                <td scope="col">{details?.phone}</td>
+                                                <td scope="col">{details?.country?.name}</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                :
+                                <div style={{ maxHeight: '400px', overflowY: 'auto' }}>
+                                    <table className="table table-striped ">
+                                        <thead>
+                                            <tr>
+                                                <th scope="col">Id</th>
+                                                <th scope="col">Contact Number</th>
+                                                <th scope="col">Country</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {
+                                                isCheckClicked ?
+                                                allContacts?.map((data, index) => (
+                                                    <tr style={{cursor: 'pointer'}} onClick={() => handleModalC(data?.id, 'all')} key={index}>
+                                                        <td scope="col">{data?.id}</td>
+                                                        <td scope="col">{data?.phone}</td>
+                                                        <td scope="col">{data?.country?.name}</td>
+                                                    </tr>
+                                                ))
+                                                :
+                                                evenContacts?.map((data, index) => (
+                                                    <tr style={{cursor: 'pointer'}} onClick={() => handleModalC(data?.id, 'all')} key={index}>
+                                                        <td scope="col">{data?.id}</td>
+                                                        <td scope="col">{data?.phone}</td>
+                                                        <td scope="col">{data?.country?.name}</td>
+                                                    </tr>
+                                                ))
+                                            }
+                                        </tbody>
+                                    </table>
+                                </div>
+                            }
+
+                            <div className="form-check mt-3 mb-3">
+                                <input
+                                    type="checkbox"
+                                    className="form-check-input"
+                                    id="onlyEvenCheckbox"
+                                    onChange={() => handleCheckboxChange('all')}
+                                />
+                                <label className="form-check-label" htmlFor="onlyEvenCheckbox">
+                                    Only Even
+                                </label>
                             </div>
 
-                            
-
-                            <button className='btn btn-lg btn-outline-primary mr-1' onClick={() => handleShow('us')} variant="outlined">US Contact</button>
-                            <button className='btn btn-lg btn-outline-primary' onClick={handleClose} variant="outlined">Close</button>
+                            <button style={{color: '#46139f', marginRight:'10px'}} className='btn btn-lg btn-outline-primary' onClick={() => handleShow('us')} variant="outlined">US Contact</button>
+                            <button style={{color: '#ff7f50'}} className='btn btn-lg btn-outline-primary' onClick={handleClose} variant="outlined">Close</button>
                         </Box>
                     </Modal>
                 </div>
@@ -110,28 +192,70 @@ const Problem2 = () => {
                         <Box sx={style}>
                             <h2 className='text-center pb-5' id="parent-modal-title">All Contacts</h2>
 
-                            <div style={{ maxHeight: '400px', overflowY: 'auto' }}>
-                                <table className="table table-striped ">
-                                    <thead>
-                                        <tr>
-                                            <th scope="col">Contact Number</th>
-                                            <th scope="col">Country</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {
-                                            usContacts?.map((data, index) => (
-                                                <tr key={index}>
-                                                    <td scope="col">{data?.phone}</td>
-                                                    <td scope="col">{data?.country?.name}</td>
-                                                </tr>
-                                            ))
-                                        }
-                                    </tbody>
-                                </table>
-                            </div>
+                            {
+                                modalC ? 
+                                <div style={{ maxHeight: '400px', overflowY: 'auto' }}>
+                                    <table className="table table-striped ">
+                                        <thead>
+                                            <tr>
+                                                <th scope="col">Id</th>
+                                                <th scope="col">Contact Number</th>
+                                                <th scope="col">Country</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td scope="col">{details?.id}</td>
+                                                <td scope="col">{details?.phone}</td>
+                                                <td scope="col">{details?.country?.name}</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                :
+                                <div style={{ maxHeight: '400px', overflowY: 'auto' }}>
+                                    <table className="table table-striped ">
+                                        <thead>
+                                            <tr>
+                                                <th scope="col">Contact Number</th>
+                                                <th scope="col">Country</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {
+                                                isCheckClicked ?
+                                                usContacts?.map((data, index) => (
+                                                    <tr style={{cursor: 'pointer'}} onClick={() => handleModalC(data?.id, 'us')} key={index}>
+                                                        <td scope="col">{data?.id}</td>
+                                                        <td scope="col">{data?.phone}</td>
+                                                        <td scope="col">{data?.country?.name}</td>
+                                                    </tr>
+                                                ))
+                                                :
+                                                evenContacts?.map((data, index) => (
+                                                    <tr style={{cursor: 'pointer'}} onClick={() => handleModalC(data?.id, 'us')} key={index}>
+                                                        <td scope="col">{data?.id}</td>
+                                                        <td scope="col">{data?.phone}</td>
+                                                        <td scope="col">{data?.country?.name}</td>
+                                                    </tr>
+                                                ))
+                                            }
+                                        </tbody>
+                                    </table>
+                                </div>
+                            }
 
-                            
+                            <div className="form-check mt-3 mb-3">
+                                <input
+                                    type="checkbox"
+                                    className="form-check-input"
+                                    id="onlyEvenCheckbox"
+                                    onChange={() => handleCheckboxChange('us')}
+                                />
+                                <label className="form-check-label" htmlFor="onlyEvenCheckbox">
+                                    Only Even
+                                </label>
+                            </div>
 
                             <button className='btn btn-lg btn-outline-primary mr-1' onClick={() => handleShow('all')} variant="outlined">All Contact</button>
                             <button className='btn btn-lg btn-outline-primary' onClick={handleClose} variant="outlined">Close</button>
